@@ -1,35 +1,41 @@
-import { TestBed } from '@angular/core/testing';
-import { RouterTestingModule } from '@angular/router/testing';
+import { render, RenderResult, screen } from '@testing-library/angular';
+import '@testing-library/jest-dom';
+import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 
 describe('AppComponent', () => {
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [
-        RouterTestingModule
-      ],
-      declarations: [
-        AppComponent
-      ],
-    }).compileComponents();
+  const sut = async () => {
+    let component: AppComponent;
+    let ComponentFixture: RenderResult<AppComponent>;
+    const appConfig = {
+      removeAngularAttributes: true,
+      declarations: [AppComponent],
+      imports: [AppRoutingModule],
+    };
+
+    const rendered = await render(AppComponent, appConfig);
+    ComponentFixture = { ...rendered };
+    component = rendered.fixture.componentInstance as AppComponent;
+    return {
+      ComponentFixture,
+      component,
+    };
+  };
+
+  it('deve renderizar o componente app', async () => {
+    const { component } = await sut();
+    expect(component).toBeTruthy();
   });
 
-  it('should create the app', () => {
-    const fixture = TestBed.createComponent(AppComponent);
-    const app = fixture.componentInstance;
-    expect(app).toBeTruthy();
+  it(`should have as title 'angular-concepts'`, async () => {
+    const { component } = await sut();
+    // expect(component.title).toEqual('angular-concepts');
+    expect(screen.getByText(/angular-concepts/i)).toBeInTheDocument();
   });
 
-  it(`should have as title 'angular-concepts'`, () => {
-    const fixture = TestBed.createComponent(AppComponent);
-    const app = fixture.componentInstance;
-    expect(app.title).toEqual('angular-concepts');
-  });
-
-  it('should render title', () => {
-    const fixture = TestBed.createComponent(AppComponent);
-    fixture.detectChanges();
-    const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('.content span')?.textContent).toContain('angular-concepts app is running!');
+  it('should change title when changeTitle() is called', async () => {
+    const { component } = await sut();
+    component.changeTitle();
+    expect(component.title).toEqual('testando novo titulo');
   });
 });
